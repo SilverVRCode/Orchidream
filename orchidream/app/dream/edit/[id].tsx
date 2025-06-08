@@ -10,11 +10,6 @@ import { Ionicons } from '@expo/vector-icons';
 const LUCIDITY_LEVEL_OPTIONS = ["Non-lucid", "Semi-lucid", "Fully lucid"] as const;
 type LucidityLevelOption = typeof LUCIDITY_LEVEL_OPTIONS[number];
 
-interface RealityCheckItem {
-  type: string;
-  outcome: string;
-}
-
 export default function EditDreamScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -35,7 +30,7 @@ export default function EditDreamScreen() {
   const [lucidityTriggers, setLucidityTriggers] = useState<string[]>([]);
   const [currentLucidityTrigger, setCurrentLucidityTrigger] = useState('');
 
-  const [realityChecks, setRealityChecks] = useState<RealityCheckItem[]>([]);
+  const [realityChecks, setRealityChecks] = useState<{ type: string; outcome: string }[]>([]);
   const [currentRealityCheckType, setCurrentRealityCheckType] = useState('');
   const [currentRealityCheckOutcome, setCurrentRealityCheckOutcome] = useState('');
 
@@ -53,7 +48,7 @@ export default function EditDreamScreen() {
       try {
         setIsLoading(true);
         // ID is already a string from useLocalSearchParams
-        const fetchedDream = await fetchDreamById(id);
+        const fetchedDream = await fetchDreamById(parseInt(id));
         if (fetchedDream) {
           setTitle(fetchedDream.title || '');
           setDescription(fetchedDream.description || '');
@@ -155,7 +150,7 @@ export default function EditDreamScreen() {
     // });
 
     try {
-      await updateDream(id, dreamToSave); // Use id directly
+      await updateDream(parseInt(id), dreamToSave);
       Alert.alert('Success', 'Dream updated successfully.');
       router.replace({ pathname: `/dream/[id]`, params: { id: id, updated: 'true' } } as any); // Use id directly
     } catch (e: any) {

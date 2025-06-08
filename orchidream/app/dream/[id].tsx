@@ -23,7 +23,7 @@ export default function DreamDetailScreen() {
     try {
       setIsLoading(true);
       // ID is already a string from useLocalSearchParams
-      const fetchedDream = await fetchDreamById(id);
+      const fetchedDream = await fetchDreamById(parseInt(id));
       setDream(fetchedDream);
       if (!fetchedDream) {
         setError('Dream not found.');
@@ -42,8 +42,7 @@ export default function DreamDetailScreen() {
 
   const handleEdit = () => {
     if (dream) {
-      const dreamObj: Dream = dream; // Explicitly cast to Dream
-      router.push({ pathname: '/dream/edit/[id]', params: { id: dreamObj._id.toString() } } as any);
+      router.push({ pathname: '/dream/edit/[id]', params: { id: dream.id.toString() } } as any);
     }
   };
 
@@ -61,7 +60,7 @@ export default function DreamDetailScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await deleteDream(dreamObj._id.toString());
+              await deleteDream(dream.id);
               Alert.alert('Success', 'Dream deleted successfully.');
               router.replace({ pathname: '/(tabs)/journal' } as any);
             } catch (e: any) {

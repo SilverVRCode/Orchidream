@@ -1,8 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 
-// Define the interface for a Dream document
-export interface Dream {
-  id: number;
+// Base interface for dream data (without ID)
+export interface DreamData {
   date: string;
   title: string;
   description: string;
@@ -13,17 +12,13 @@ export interface Dream {
   lucidityTriggers?: string[];
 }
 
-// Interface for data required to create a new dream
-export interface NewDreamData {
-  date: string;
-  title: string;
-  description: string;
-  lucidityLevel?: string;
-  tags?: string[];
-  emotions?: string[];
-  realityChecks?: { type: string; outcome: string }[];
-  lucidityTriggers?: string[];
+// Interface for a Dream document (includes ID)
+export interface Dream extends DreamData {
+  id: number;
 }
+
+// Interface for data required to create a new dream
+export interface NewDreamData extends DreamData {}
 
 // Define the interface for a Conversation Message
 export interface ConversationMessage {

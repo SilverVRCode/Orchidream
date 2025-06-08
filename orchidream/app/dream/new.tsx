@@ -14,11 +14,6 @@ import { Audio } from 'expo-av';
 const LUCIDITY_LEVEL_OPTIONS = ["Non-lucid", "Semi-lucid", "Fully lucid"] as const;
 type LucidityLevelOption = typeof LUCIDITY_LEVEL_OPTIONS[number];
 
-interface RealityCheckItem {
-  type: string;
-  outcome: string;
-}
-
 export default function NewDreamScreen() {
     const router = useRouter();
 
@@ -159,9 +154,6 @@ export default function NewDreamScreen() {
     "Other"
   ];
 
-  const [wbtb, setWbtb] = useState(false);
-  const [notes, setNotes] = useState('');
-
   // Animation for "Live" button
   const [isLivePressed, setIsLivePressed] = useState(false);
   const Animated = require('react-native').Animated;
@@ -189,7 +181,7 @@ export default function NewDreamScreen() {
   const [lucidityTriggers, setLucidityTriggers] = useState<string[]>([]);
   const [currentLucidityTrigger, setCurrentLucidityTrigger] = useState('');
 
-  const [realityChecks, setRealityChecks] = useState<RealityCheckItem[]>([]);
+  const [realityChecks, setRealityChecks] = useState<{ type: string; outcome: string }[]>([]);
   const [currentRealityCheckType, setCurrentRealityCheckType] = useState('');
   const [currentRealityCheckOutcome, setCurrentRealityCheckOutcome] = useState('');
 
@@ -260,7 +252,7 @@ export default function NewDreamScreen() {
       emotions: emotions.length > 0 ? emotions : undefined,
       lucidityTriggers: lucidityTriggers.length > 0 ? lucidityTriggers : undefined,
       realityChecks: realityChecks.length > 0 ? realityChecks : undefined,
-      // method, wbtb, and notes are not saved (DB schema does not support them yet)
+      // method: method || undefined, // Note: method field not yet in database schema
     };
 
     try {
@@ -334,48 +326,29 @@ export default function NewDreamScreen() {
             placeholder="Dream title"
           />
 
-          {/* Lucidity Level Selector (already present) */}
-
           {/* Method/Technique Selector */}
           <ThemedText style={styles.label}>Method/Technique</ThemedText>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={method}
-              onValueChange={setMethod}
-              style={styles.picker}
-            >
-              <Picker.Item label="Select method..." value={null} />
-              <Picker.Item label="MILD" value="MILD" />
-              <Picker.Item label="WILD" value="WILD" />
-              <Picker.Item label="DILD" value="DILD" />
-              <Picker.Item label="SSILD" value="SSILD" />
-              <Picker.Item label="FILD" value="FILD" />
-              <Picker.Item label="DEILD" value="DEILD" />
-              <Picker.Item label="Other" value="Other" />
-            </Picker>
+          <View style={styles.methodContainer}>
+            {METHOD_OPTIONS.map(opt => (
+              <TouchableOpacity
+                key={opt}
+                style={[
+                  styles.methodButton,
+                  method === opt && styles.methodButtonSelected,
+                ]}
+                onPress={() => setMethod(opt)}
+              >
+                <ThemedText
+                  style={[
+                    styles.methodButtonText,
+                    method === opt && styles.methodButtonTextSelected
+                  ]}
+                >
+                  {opt}
+                </ThemedText>
+              </TouchableOpacity>
+            ))}
           </View>
-
-          {/* WBTB Selector */}
-          <View style={styles.toggleRow}>
-            <ThemedText style={styles.label}>WBTB Used</ThemedText>
-            <Switch
-              value={wbtb}
-              onValueChange={setWbtb}
-              trackColor={{ false: "#ccc", true: "#007bff" }}
-              thumbColor={wbtb ? "#fff" : "#fff"}
-            />
-          </View>
-
-          {/* Additional Notes */}
-          <ThemedText style={styles.label}>Additional Notes</ThemedText>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={notes}
-            onChangeText={setNotes}
-            placeholder="Any extra notes..."
-            multiline
-            numberOfLines={3}
-          />
 
           {/* Live Button with Animated Gradient Circle */}
           <View style={styles.liveButtonContainer}>
@@ -517,86 +490,6 @@ export default function NewDreamScreen() {
             ))}
           </View>
 
-          {/* Method/Technique Selector */}
-          <ThemedText style={styles.label}>Method/Technique</ThemedText>
-          <View style={styles.pickerContainer}>
-            <TextInput
-              style={styles.pickerInput}
-              value={method || ''}
-              placeholder="Select method"
-              onFocus={() => {}}
-              showSoftInputOnFocus={false}
-              editable={false}
-            />
-            <View style={styles.pickerDropdown}>
-              {METHOD_OPTIONS.map(opt => (
-                <TouchableOpacity
-                  key={opt}
-                  style={[
-                    styles.pickerOption,
-                    method === opt && styles.pickerOptionSelected,
-                  ]}
-                  onPress={() => setMethod(opt)}
-                >
-                  <ThemedText style={[
-                    styles.pickerOptionText,
-                    method === opt && styles.pickerOptionTextSelected,
-                  ]}>
-                    {opt}
-                  </ThemedText>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          {/* WBTB Selector */}
-          <View style={styles.toggleRow}>
-            <ThemedText style={styles.label}>WBTB Used</ThemedText>
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                wbtb && styles.toggleButtonActive,
-              ]}
-              onPress={() => setWbtb(v => !v)}
-              accessibilityRole="switch"
-              accessibilityState={{ checked: wbtb }}
-            >
-              <View style={[
-                styles.toggleCircle,
-                wbtb && styles.toggleCircleActive,
-              ]} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Notes */}
-          <ThemedText style={styles.label}>Additional Notes</ThemedText>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={notes}
-            onChangeText={setNotes}
-            placeholder="Any extra notes..."
-            multiline
-            numberOfLines={3}
-          />
-
-          {/* Live Button with Animated Gradient Circle */}
-          <View style={styles.liveButtonContainer}>
-            <Animated.View
-              style={[
-                styles.liveCircle,
-                { transform: [{ scale: liveAnim }] },
-              ]}
-            >
-              <TouchableOpacity
-                style={styles.liveButton}
-                onPressIn={() => setIsLivePressed(true)}
-                onPressOut={() => setIsLivePressed(false)}
-                activeOpacity={0.7}
-              >
-                <ThemedText style={styles.liveButtonText}>Live</ThemedText>
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
 
           <TouchableOpacity style={styles.saveButton} onPress={handleSaveDream}>
             <Ionicons name="save-outline" size={20} color="white" />
@@ -659,6 +552,33 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   pickerOptionTextSelected: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  methodContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 16,
+  },
+  methodButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: '#e0e0e0',
+    margin: 4,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  methodButtonSelected: {
+    backgroundColor: '#007bff',
+    borderColor: '#007bff',
+  },
+  methodButtonText: {
+    color: '#333',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  methodButtonTextSelected: {
     color: '#fff',
     fontWeight: 'bold',
   },
