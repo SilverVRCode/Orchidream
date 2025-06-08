@@ -33,10 +33,14 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "GEMINI_API_KEY": "${process.env.GEMINI_API_KEY}"
     }
   }
 }
